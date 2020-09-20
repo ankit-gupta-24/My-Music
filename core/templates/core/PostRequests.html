@@ -1,0 +1,460 @@
+<script>
+var audio = new Audio();
+var ispaused = null;
+var mytimer = null;
+var volumeslider =document.getElementById('vol-chng');
+
+var playlist_arr;
+var isPlaylistPlaying = false;
+var playlist_song_count = 0;
+var counter = 0;
+
+volumeslider.addEventListener('mousemove',setvolume);
+
+function setIsTyping(){
+    isTyping = true;
+}
+
+document.addEventListener('keydown',function(e){
+    if(e.which == 32 && ispaused == false && isTyping == false){
+        e.preventDefault();
+        pauseAudio();
+    }
+    else if(e.which==32 && ispaused == true && isTyping == false){
+        e.preventDefault();
+        playAudio();
+    }
+
+    if(e.which == 38 || e.which == 39 && isTyping == false){
+        e.preventDefault();
+        getNextSong();
+    }
+
+    if(e.which == 37 || e.which == 40 && isTyping == false){
+        e.preventDefault();
+        getPrevSong();
+    }
+
+});
+
+
+window.onbeforeunload = function(e){
+    if (typeof(Storage) !== "undefined") {
+        if($('#play-btn').attr('song-id') !== null){
+            localStorage.setItem('cur-playing-song-id',$('#play-btn').attr('song-id'));
+            // localStorage.setItem('cur-playing-song-cur-time',audio.currentTime);
+        }
+    }
+}
+
+window.onunload = function(e){
+    
+}
+
+window.onload = function(e){
+
+    id = localStorage.getItem('cur-playing-song-id');
+    // console.log(id);
+    // console.log(localStorage.getItem('cur-playing-song-cur-time'));
+    if(id !== 'undefined'){
+        getSongSrc(localStorage.getItem('cur-playing-song-id'));
+    }
+}
+
+function AddtoLiked(e){
+    // console.log(e);
+    song_id = e.getAttribute('song-id');
+    $.post(
+        'http://127.0.0.1:8000/AddToLiked/',
+        {
+            song_id : song_id,
+            'csrfmiddlewaretoken':'{{csrf_token}}'
+        },
+        function(data){
+            msg_html = `<div class='alert alert-${data['tag']} alert-dismissible'>
+                        <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>
+                        ${data['msg']}
+                        </div>`;
+            // console.log(msg_html);
+            $('#msg-div').html(msg_html);
+            // console.log(data);
+
+    });
+}
+
+function AddtoFav(e){
+    $.post(
+    'http://127.0.0.1:8000/AddToFavourite/',
+        {
+            song_id : e.getAttribute('song-id'),
+            'csrfmiddlewaretoken':'{{csrf_token}}'
+        },
+        function(data){
+            msg_html = `<div class='alert alert-${data['tag']} alert-dismissible'>
+                        <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>
+                        ${data['msg']}
+                        </div>`;
+            // console.log(msg_html);
+            $('#msg-div').html(msg_html);
+            // console.log(data);
+    });
+}
+
+function RemoveFromFav(e){
+    $.post(
+        'http://127.0.0.1:8000/RemoveFromFavourite/',
+        {
+            song_id : e.getAttribute('song-id'),
+            'csrfmiddlewaretoken':'{{csrf_token}}'
+        },
+        function(data){
+            // console.log(data);
+            window.location.reload();
+        }
+    );
+}
+
+function RemoveFromLiked(e){
+    $.post(
+        'http://127.0.0.1:8000/RemoveFromLiked/',
+        {
+            song_id : e.getAttribute('song-id'),
+            'csrfmiddlewaretoken':'{{csrf_token}}'
+        },
+        function(data){
+            // console.log(data);
+            window.location.reload();
+        }
+    );
+}
+
+
+function setSongData(data){
+    var instance = JSON.parse(data['obj']);                        
+    // console.log(instance)
+    var audio_file = 'http://127.0.0.1:8000/media/'+instance[0]['audio_file'];
+    var img_file = 'http://127.0.0.1:8000/media/'+instance[0]['song_image'];
+    var title = instance[0]['title'];
+    var id = parseInt(instance[0]['id']);
+    // var dur = parseInt(instance[0]['songtime_in_seconds']);
+
+    $('#current_song_img').attr({'src':img_file});
+    $('#current_song_title').html(title);
+    $('#current_song_like').attr({'song-id':id});
+    $('#current_song_fav').attr({'song-id':id});
+    $('#player-bottom-fixed').css('visibility','visible');
+
+    try{
+        pauseAudio();
+    }
+    catch(err){
+        console.log(err);
+    }
+
+    audio = new Audio(audio_file);
+    audio.load();
+    audio.loop = false;
+
+    try{
+        playAudio(id);
+    }
+    catch(err){
+        pauseAudio();
+        console.log(err);
+    }
+}
+
+function getSongSrc(e){
+    if(typeof(e) == 'object' && e !== null){
+        idx = e.getAttribute('song-id');
+    }
+    else{
+        idx = e;
+    }
+    $.post(
+        'http://127.0.0.1:8000/getSongSrc/',
+        {
+            song_id:idx,
+            'csrfmiddlewaretoken':'{{csrf_token}}',
+        },
+        function (data){
+            setSongData(data);            
+        }
+    );
+}
+
+function shuffleAllSongs(){
+    $.post(
+        'http://127.0.0.1:8000/shuffleAllSongs/',
+        {
+            'csrfmiddlewaretoken':'{{csrf_token}}',
+        },
+        function (data){
+            setSongData(data);            
+        }
+    );
+
+}
+
+function getNextSong(){
+    var curr_song_id;
+    if(isPlaylistPlaying == false){
+        curr_song_id =  parseInt($('#play-btn').attr('song-id'))+1;
+    }
+    else{
+        if (counter >= playlist_song_count){
+            curr_song_id =  parseInt($('#play-btn').attr('song-id'))+1;
+        }
+        else{
+            counter+=1
+            curr_song_id = playlist_arr[counter]['id'];
+        }
+    }
+    // console.log('current song id = '+curr_song_id);
+    $.post(
+        'http://127.0.0.1:8000/getSongSrc/',
+        {
+            song_id:curr_song_id,
+            'csrfmiddlewaretoken':'{{csrf_token}}',
+        },
+        function (data){
+            setSongData(data);
+            
+        }
+    );
+}
+
+function getPrevSong(){
+    var curr_song_id;
+    if(isPlaylistPlaying == false){
+        curr_song_id =  parseInt($('#play-btn').attr('song-id'))-1;
+    }
+    else{
+        if(counter <= 0){
+            curr_song_id =  parseInt($('#play-btn').attr('song-id'))-1;
+        }
+        else{
+            counter-=1
+            curr_song_id = playlist_arr[counter]['id'];
+        }
+    }
+    $.post(
+        'http://127.0.0.1:8000/getSongSrc/',
+        {
+            song_id:curr_song_id,
+            'csrfmiddlewaretoken':'{{csrf_token}}',
+        },
+        function (data){
+            setSongData(data);
+            
+        }
+    );
+}
+
+function playAudio(id){
+    
+    var playPromise = audio.play();
+    if(playPromise !== undefined){
+        playPromise.then(_ => {
+            $('#play-btn').addClass('fa-pause');
+            $('#play-btn').removeClass('fa-play');
+            $('#play-btn').attr({'onclick':'pauseAudio()'});
+            $('#play-btn').attr({'song-id':id});
+
+            let song_dur = Math.ceil(audio.duration);
+            let m = Math.floor(song_dur/60);
+            let s = song_dur % 60;
+            $('#song-duration').text(m+' : '+s);
+            $('#song-time-range').attr({'min':0,'max':Math.ceil(audio.duration),'value':Math.ceil(audio.currentTime)});
+            ispaused = false;
+            startTimer();
+            
+        })
+        .catch(err =>{
+            // for chrome beacuse autoplay policy changed
+            $('#play-btn').addClass('fa-play');
+            $('#play-btn').removeClass('fa-pause');
+            $('#play-btn').attr({'onclick':'playAudio()'});
+            console.log(err);
+
+            $('#play-btn').attr({'song-id':id});
+            let song_dur = Math.ceil(audio.duration);
+            let m = Math.floor(song_dur/60);
+            let s = song_dur % 60;
+            $('#song-duration').text(m+' : '+s);
+            $('#song-time-range').attr({'min':0,'max':Math.ceil(audio.duration),'value':Math.ceil(audio.currentTime)});
+            ispaused = false;
+            
+            startTimer();
+        })
+    }
+
+}
+
+function pauseAudio(){
+    $('#play-btn').addClass('fa-play');
+    $('#play-btn').removeClass('fa-pause');
+    $('#play-btn').attr({'onclick':'playAudio()'});
+    audio.pause();
+    ispaused=true;
+    
+}
+
+function updateValues(){
+    
+    if(!ispaused){
+    
+        let song_cur_t = Math.ceil(audio.currentTime);
+        let m = Math.floor(song_cur_t/60);
+        let s = song_cur_t % 60;
+
+        $('#song-current-time').text(m+' : '+s);
+        $('#song-time-range').attr({'value':Math.ceil(audio.currentTime)});
+
+        if(audio.currentTime == audio.duration){
+            clearInterval(mytimer);
+            pauseAudio();
+            if( isPlaylistPlaying == false){
+                getNextSong();
+            }
+            else{
+                counter+=1;
+                getNextPlaylistSong();
+            }
+        }
+    }
+}
+
+function startTimer(){
+    mytimer = setInterval(updateValues,1000);
+}
+
+function setvolume(){
+    audio.volume = volumeslider.value / 100;
+}
+
+function getPlaylists(e){
+    $.post(
+        'http://127.0.0.1:8000/getUserPlaylist/',
+        {
+            'csrfmiddlewaretoken':'{{ csrf_token }}'
+        },
+        function(data){
+            var instance = JSON.parse(data['playlist']);
+            // <a class="dropdown-item" href="javascript:void(0);" playlist-id='' song-id='{{song.id}}' onclick="AddtoPlaylist(this)"></a>
+            
+            var new_html = `<a class="dropdown-item disabled" href="#">Add To Playlist</a>
+                                    <div class="dropdown-divider"></div>`;
+
+            sid = e.getAttribute('song-id')
+            instance.forEach(elem => {
+                new_html += `<a class="dropdown-item" href="javascript:void(0);" playlist-id='${elem['id']}' song-id='${sid}' onclick="AddtoPlaylist(this)">${elem['title']}</a>`;
+            });
+            $('.drop-playlist').html(new_html);
+        }
+    );
+}
+
+function AddtoPlaylist(e){
+
+    var sid = e.getAttribute('song-id');
+    var pid = e.getAttribute('playlist-id');
+
+    $.post(
+        'http://127.0.0.1:8000/AddSongToPlaylist/',
+        {
+            'csrfmiddlewaretoken':'{{ csrf_token }}',
+            sid:sid,
+            pid:pid,
+        },
+        function(data){
+            msg_html = `<div class='alert alert-${data['tag']} alert-dismissible'>
+                        <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>
+                        ${data['msg']}
+                        </div>`;
+            $('#msg-div').html(msg_html);
+        }
+    );
+
+}
+
+function removeFromPlaylist(e){
+    $.post(
+        'http://127.0.0.1:8000/removeSongFromPlaylist/',
+        {
+            sid : e.getAttribute('song-id'),
+            pid : e.getAttribute('playlist-id'),
+            'csrfmiddlewaretoken':'{{csrf_token}}'
+        },
+        function(data){
+            window.location.reload();
+        }
+    );
+}
+
+function playPlaylist(e){
+    
+    let pid = e.getAttribute('playlist-id');
+
+    $.post(
+        'http://127.0.0.1:8000/PlayPlaylist/',
+        {
+            'csrfmiddlewaretoken':'{{csrf_token}}',
+            pid:pid,
+        },
+        function(data){
+            playlist_arr = JSON.parse(data['playlist_songs']);
+            playlist_song_count = data['songCount'];
+            isPlaylistPlaying = true;
+            // console.log(playlist_arr,playlist_song_count);
+            if (playlist_song_count > 0){
+                getSongSrc(playlist_arr[0]['id']);
+            }
+            else{
+                msg_html = `<div class='alert alert-danger' alert-dismissible'>
+                        <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>
+                        No Song to Play. Please Add song to Playlist before playing.
+                        </div>`;
+                $('#msg-div').html(msg_html);
+
+            }
+        }
+    );
+
+    
+}
+
+function getNextPlaylistSong(){
+    if (counter<playlist_song_count){
+        getSongSrc(playlist_arr[counter]['id']);
+    }
+    else{
+        isPlaylistPlaying = false;
+        getNextSong();
+    }
+}
+
+
+function generateShareLink(e){
+    sid = e.getAttribute('song-id');
+    msg_html = `<div class='alert alert-primary' alert-dismissible'>
+                        <a href='#' class='close' data-dismiss='alert' aria-label='close'>&times;</a>
+                        Share Link: <button class='btn btn-warning btn-sm' id='c-btn' onclick='copyLink()'>Copy</button>
+                        <hr> <span id='s-link'> http://127.0.0.1:8000/sharedSong/${sid}/</span>
+                        </div>`;
+    $('#msg-div').html(msg_html);
+}
+
+
+
+function copyLink() {
+    var range = document.createRange();
+    range.selectNode(document.getElementById("s-link"));
+    window.getSelection().removeAllRanges(); // clear current selection
+    window.getSelection().addRange(range); // to select text
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();// to deselect
+    document.getElementById('c-btn').innerHTML = 'Copied';
+}
+
+</script>

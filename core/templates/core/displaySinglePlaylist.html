@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Welcome to Bajate Raho{% endblock %}
+
+{% block content %}
+
+<div id='main'>
+    <div id='msg-div'>
+
+    </div>
+    <h3 class="text-center" style="text-transform: uppercase;">{{title}} <small>({{songCount}} songs)</small></h3>
+    <div class="text-center">
+        <a href="javascript:void(0);" onclick="playPlaylist(this)" class="col mt-2 col-6 fa fa-play text-secondary control-btn" style="text-decoration: none;" playlist-id='{{id}}' > Play All</a>
+    </div>
+    <hr>
+    <ul>
+        {% for song in playlist_songs %}
+        <li>
+            <div class="single-song row pt-1">
+                
+                <div class="col col-lg-1 col-md-1 col-sm-1 col-1 text-right"><span class="fa fa-music text-danger"></span></div>
+                <div class="control-btn col col-lg-6 col-md-8 col-sm-9 col-9" style="font-family: 'Josefin Slab', serif;" song-id='{{song.id}}' onclick="getSongSrc(this)"><span>{{song.title}} </span></div>
+                <div class="col col-lg-1 col-md-1 col-sm-1 col-1 fa fa-play text-secondary control-btn" song-id='{{song.id}}' onclick="getSongSrc(this)" data-toggle="tooltip" data-placement="top" title="play song"></div>
+                <div><span class="fa fa-remove control-btn text-danger col col-lg-4 col-md-2 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Remove from Playlist" song-id='{{song.id}}' playlist-id='{{id}}' onclick="removeFromPlaylist(this)"></span></div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+{% block script %}
+{% include 'core/PostRequests.html' %}
+{% endblock %}

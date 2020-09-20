@@ -1,0 +1,29 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Register New User {% endblock %}
+{% block content %}        
+    <form method="POST" action="{% url 'registerForm' %}" class="form-group  m-auto mt-5 w-50 shadow p-3 mb-5 bg-white rounded">
+        {% csrf_token %}
+        <h1 class="text-center">Register</h1>
+        <p class="text-danger">{{form.errors}}</p>
+
+        {{form.username.label_tag}}
+        {{form.username}}
+        
+        {{form.email.label_tag}}
+        {{form.email}}
+
+        {{form.password1.label_tag}}
+        {{form.password1}}
+        
+        {{form.password2.label_tag}}
+        {{form.password2}}
+
+
+        <div class="text-center">
+            <input type="submit" value="Submit" class="btn btn-info ">
+        </div>
+
+    </form>
+    <p class="text-center">Already Registered ! <a href="{% url 'loginForm' %}">Login Here</a></p>
+
+{% endblock %}

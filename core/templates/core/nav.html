@@ -1,0 +1,29 @@
+<div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0);" class="closebtn" onclick="closeNav()">&times;</a>
+    
+    {% if request.user.is_authenticated %}
+    <h3 >Hi {{request.user.username}}</h3>
+    <a href="{% url 'index' %}" ><span class="fa fa-home"></span>&nbsp;&nbsp; Home</a>
+    <a href="{% url 'getUserFavouriteSongList' %}"><span class="fa fa-heart"></span>&nbsp;&nbsp; My Favourite Songs</a>
+    <a href="{% url 'getUserLikedSong' %}"><span class="fa fa-thumbs-up"></span>&nbsp;&nbsp; My Liked Songs</a>
+    <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModal"> <span class="fa fa-plus-circle" onclick="setIsTyping()"></span>&nbsp;&nbsp; Create New Playlist</a>
+    <a href="{% url 'displayUserPlaylist' %}"><span class="fa fa-list"></span>&nbsp;&nbsp; My Playlists</a>
+    <a href="{% url 'changePasswordForm' %}"><span class="fa fa-key"></span>&nbsp;&nbsp; ChangePassword</a>
+    <a href="{% url 'allMovieTag' %}"><span class="fa fa-file-video-o"></span>&nbsp;&nbsp; All Movie Tag</a>
+    <a href="{% url 'allArtistTag' %}"><span class="fa fa-user"></span>&nbsp;&nbsp; All Artist Tag</a>
+    <a href="{% url 'logoutUser' %}" style="color:red !important;"><span class="fa fa-sign-out"></span>&nbsp;&nbsp; Logout</a>
+    <!-- <a href="#">Theme</a> -->
+    {% else %}
+    <h3>Hi Guest user</h3>
+    <a href="{% url 'index' %}" ><span class="fa fa-home"></span>&nbsp;&nbsp; Home</a>
+    <a href="{% url 'loginForm' %}"><span class="fa fa-sign-in"></span>&nbsp;&nbsp;Login</a>
+    {% endif %}
+    <!-- <a href="#">Add App to Home Screen</a> -->
+</div>
+
+<nav class="navbar navbar-dark bg-dark">
+    <span onclick="openNav()" class="fa fa-bars text-white" id='nav-opener'></span>
+    <a class="navbar-brand" ><span style="font-family: Rakkas;">BAJATE </span> <span style="font-family: 'Architects Daughter', cursive;"> RAHO </span> </a>
+</nav>
+
+

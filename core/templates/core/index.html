@@ -1,0 +1,129 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Welcome to Bajate Raho{% endblock %}
+
+{% block content %}
+
+<div id='main'>
+
+    <div class="search-div mt-3 ">
+        <form class="search-form" method="POST" action="{% url 'search' %}">
+            {% csrf_token %}
+            <input class="search-form-input form-control" type="search" name="searchkey" onfocus="setIsTyping()" placeholder="Search song by movie, singer, language, artist ...." aria-label="Search">
+            <button class="btn fa fa-search" type="submit" ></button>
+        </form>
+    </div>
+
+    <div id='msg-div'>
+
+    </div>
+    <h4>Featured Songs for You</h4>
+    <div id='featuredSongs'>
+        <div class="scrollmenu" >
+            {% for song in recent_releases %}
+            <div class="text-center">
+                <img src="media/{{song.song_image}}" song-id='{{song.id}}' onclick="getSongSrc(this)" alt="{{song.title}}" width="150px" height="100px" class="img-thumbnail">
+                <p class="text-center Kalam">{{song.title}}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col col-lg-6 col-md-12 col-sm-12 col-12 p-5">
+
+            <h2 style="font-family: 'Architects Daughter', cursive;" >Recent Releases</h2>
+            <div class="scrollmenu" >
+                {% for song in recent_releases %}
+                <div class="text-center">
+                    <img src="media/{{song.song_image}}" song-id='{{song.id}}' onclick="getSongSrc(this)" alt="{{song.title}}" width="150px" height="100px" class="img-thumbnail">
+                    <p class="text-center Kalam">{{song.title}}</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h2 class="mt-2" style="font-family: 'Architects Daughter', cursive;">Categories</h2>
+            <div class="scrollmenu" >
+                {% for category in all_categories %}
+                <a href="{% url 'CategoryWiseSong' category=category %}" category-id='{{category}}' class="text-center"> 
+                    <img src="/media/images/{{ random_images | random}}"  alt="{{category}}" width="150px" height="100px" class="img-thumbnail">
+                    <p class="text-center kalam">{{category}}</p>
+                </a>
+                {% endfor %}
+            </div>
+
+            <h2 class="mt-2" style="font-family: 'Architects Daughter', cursive;">Language</h2>
+            <div class="scrollmenu" >
+                {% for language in all_languages %}
+                <a href="{% url 'LanguageWiseSong' language=language %}" language-id='{{language}}' class="text-center">
+                    <img src="/media/images/{{ random_images | random}}"  alt="{{language}}" width="150px" height="100px" class="img-thumbnail">
+                    <p class="text-center kalam">{{language}}</p>
+                </a>
+                {% endfor %}
+            </div>
+
+          
+        </div>
+
+        <div class="col col-lg-6 col-md-12 col-sm-12 col-12 p-5">
+            <h3 style="font-family: 'Josefin Sans', sans-serif;">Popular songs</h3>
+            <ul>
+                {% for song in popular_songs %}
+                <li>
+                    <div class="single-song row pt-1">
+                        <div class="col col-lg-1 col-md-1 col-sm-1 col-1"><span class="fa fa-music text-danger"></span></div>
+                        <div class="control-btn col col-lg-7 col-md-7 col-sm-7 col-7" style="font-family: 'Josefin Slab', serif;" song-id='{{song.id}}' onclick="getSongSrc(this)"><span>{{song.title}} </span></div>
+                        {% if request.user.is_authenticated %}
+                        <div><span class="fa fa-thumbs-up control-btn text-primary col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Like" song-id='{{song.id}}' onclick="AddtoLiked(this)"></span></div>
+                        <div><span class="fa fa-heart control-btn text-danger col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Add to favourites" song-id='{{song.id}}' onclick="AddtoFav(this)"></span></div>                        
+                        <div class="col col-lg-1 col-md-1 col-sm-1 col-1 control-btn">
+                            <div class="dropdown">
+                                <span class="fa fa-tasks control-btn text-info " data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" song-id='{{song.id}}' onclick="getPlaylists(this)"></span>
+                                <div class="dropdown-menu drop-playlist" aria-labelledby="dropdownMenuButton" >
+                                    
+                                </div>
+                              </div>
+                        </div>
+                        {% endif %}
+                        <div><span class="fa fa-share-alt control-btn text-secondary col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Share Song" song-id='{{song.id}}' onclick="generateShareLink(this)"></span></div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <h3 class="mt-2" style="font-family: 'Josefin Sans', sans-serif;">Popular 90's song</h3>
+            <ul>
+                {% for song in popular_90s %}
+                <li>
+                    <div class="single-song row pt-1">
+                        <div class="col col-lg-1 col-md-1 col-sm-1 col-1"><span class="fa fa-music text-danger"></span></div>
+                        <div class="control-btn col col-lg-7 col-md-7 col-sm-7 col-7" style="font-family: 'Josefin Slab', serif;"song-id='{{song.id}}' onclick="getSongSrc(this)"><span>{{song.title}} </span></div>
+                        {% if request.user.is_authenticated %}
+                        <div><span class="fa fa-thumbs-up control-btn text-primary col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Like" song-id='{{song.id}}' onclick="AddtoLiked(this)"></span></div>
+                        <div><span class="fa fa-heart control-btn text-danger col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Add to favourites" song-id='{{song.id}}' onclick="AddtoFav(this)"></span></div>
+                        
+                        <div>
+                            <div class="dropdown">
+                                <span class="fa fa-tasks control-btn text-info col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" song-id='{{song.id}}' onclick="getPlaylists(this)"></span>
+                                <div class="dropdown-menu drop-playlist" aria-labelledby="dropdownMenuButton" >
+                                    
+                                </div>
+                              </div>
+                        </div>
+                        {% endif %}
+                        <div><span class="fa fa-share-alt control-btn text-secondary col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Share Song" song-id='{{song.id}}' onclick="generateShareLink(this)" ></span></div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{% include 'core/PostRequests.html' %}
+{% endblock %}

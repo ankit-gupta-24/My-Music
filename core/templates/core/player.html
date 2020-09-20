@@ -1,0 +1,49 @@
+{% load static %}
+
+<div id="player-bottom-fixed" class="bg-dark text-white">
+    <div class="row">
+        <div class="col col-lg-4 col-md-12 col-sm-12 col-12">
+            <div class="row d-flex">
+                <div class="col col-3">
+                    <img src="{% static 'images/common-song-img.png' %}" class='player-song-img' id='current_song_img' alt="song img" />
+                </div>
+                <div class="col col-1 align-self-center" style="font-size: xx-large;">
+                    {% if request.user.is_authenticated %}
+                    <div><span class="fa fa-thumbs-up control-btn text-primary " data-toggle="tooltip" data-placement="top" title="Like" id='current_song_like' song-id='' onclick="AddtoLiked(this)"></span></div>
+                    <div><span class="fa fa-heart control-btn text-danger " data-toggle="tooltip" data-placement="top" title="Add to favourites" id='current_song_fav' song-id='' onclick="AddtoFav(this)"></span></div>
+                    {% endif %}
+                </div>
+                <div class="col col-8 align-self-center">
+                    <marquee style="font-size: 20px; font-family: 'Josefin Slab', serif;" id='current_song_title'>Song Name</marquee>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col col-lg-5 col-md-12 col-sm-12 col-12 bg-dark d-flex flex-column " id='player-controls'>
+            
+            <div class="pt-3 text-center d-flex flex-row justify-content-center">
+                <button onclick="getPrevSong()" class="btn btn-light fa fa-chevron-left mr-1" data-toggle="tooltip" data-placement="top" title="Previous Song" ></button>
+                <button onclick="playAudio()" class="btn btn-light fa fa-play mr-1" data-toggle="tooltip" data-placement="top" title="Play / Pause" id='play-btn'></button>
+                <button onclick="getNextSong()" class="btn btn-light fa fa-chevron-right mr-1" data-toggle="tooltip" data-placement="top" title="next Song" ></button>
+                <button onclick="shuffleAllSongs()" class="btn btn-light fa fa-random " data-toggle="tooltip" data-placement="top" title="Shuffle All Songs"></button>
+            </div>
+            <div class="pt-1 text-center d-flex flex-row justify-content-around">
+                <span id='song-current-time' class=" text-white"></span>
+                <input type="range" class="form-control-range w-75"  min='0' max='0' value='0' id="song-time-range" disabled>
+                <span id='song-duration' class=" text-white"></span>
+            </div>
+
+        </div>
+
+        <div class="col col-lg-3 col-md-12 col-sm-12 col-12 pt-3 d-flex flex-column align-self-center " id='vol-div' style="font-size: x-large;">
+            <div class="d-flex flex-row justify-content-around">
+                <div class="vol-slider ">
+                    <span class="fa fa-volume-up text-light pt-1"></span>
+                    <input class="input-vol-range" type="range" step="1" value="100" min="0" max="100" id='vol-chng'>
+                </div>  
+                
+            </div>
+        </div>
+    </div>
+</div>

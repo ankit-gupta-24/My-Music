@@ -1,0 +1,29 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Welcome to Bajate Raho{% endblock %}
+
+{% block content %}
+
+<div id='main'>
+    
+    {% if art %}
+        <h3 class="text-center">All Artist Tags</h3><hr>
+        <div class="container tag-container">
+            {% for tag in tags %}
+            <a href="{% url 'ArtistWiseSong' artist=tag %}" class="tg"  >{{tag}}</a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h3 class="text-center">All Movie Tags</h3><hr>
+        <div class="container tag-container">
+            {% for tag in tags %}
+            <a href="{% url 'MovieWiseSong' movieName=tag %}" class="tg" >{{tag}}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+</div>
+
+{% endblock %}

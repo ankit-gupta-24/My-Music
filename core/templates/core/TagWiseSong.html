@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Welcome to Bajate Raho{% endblock %}
+{% block content %}
+<div id="main">
+    <h3>{{category}} Songs</h3>
+    <div id="msg-div">
+
+    </div>
+    <div class="row"> 
+        <div class="card-deck p-5 mb-5 bg-white w-100">
+        {% for song in category_songs %}
+            <div class="col col-lg-2 col-md-3 col-sm-4 col-6 mb-2">
+                <div class="card" style="margin: 0;" >
+                    <img class="card-img-top control-btn" song-id = '{{song.id}}' src="http://127.0.0.1:8000/media/{{song.song_image}}" onclick="getSongSrc(this)" alt="{{song.title}}">
+                    <div class="card-body control-btn" song-id='{{song.id}}'' style="padding: .25rem;" onclick="getSongSrc(this)">
+                      <p class="card-title" style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">{{song.title}}</p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col col-3 fa fa-play text-secondary control-btn" song-id='{{song.id}}' onclick="getSongSrc(this)" ></div>
+                            {% if request.user.is_authenticated %}
+                            <div class="col col-3 fa fa-thumbs-up text-primary control-btn" song-id='{{song.id}}' onclick="AddtoLiked(this)"></div>
+                            <div class="col col-3 fa fa-heart text-danger control-btn" song-id='{{song.id}}' onclick="AddtoFav(this)"></div>
+                            
+                            <!-- <div class="col col-3 fa fa-list text-info control-btn" song-id='{{song.id}}'></div> -->
+                            <div class="col col-3 control-btn">
+                                <div class="dropdown">
+                                    <span class="fa fa-tasks control-btn text-info " data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" song-id='{{song.id}}' onclick="getPlaylists(this)"></span>
+                                    <div class="dropdown-menu drop-playlist" aria-labelledby="dropdownMenuButton" >
+                                        
+                                    </div>
+                                  </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                  </div>
+
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{% include 'core/PostRequests.html' %}
+{% endblock %}

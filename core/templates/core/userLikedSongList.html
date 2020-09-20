@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Welcome to Bajate Raho{% endblock %}
+{% block content %}
+<div id="main">
+    <h2>Liked Songs</h2>
+    <div id='msg-div'></div>
+    <ul>
+        {% for obj in LikedSong %}
+        <li>
+            <div class="single-song row pt-1">
+                <div class="col col-lg-1 col-md-1 col-sm-1 col-1"><span class="fa fa-music text-danger"></span></div>
+                <div class="control-btn col col-lg-7 col-md-7 col-sm-7 col-7" style="font-family: 'Josefin Slab', serif;" song-id='{{obj.song.id}}' onclick="getSongSrc(this)"><span>{{obj.song.title}} </span></div>
+                {% if request.user.is_authenticated %}
+                <div><span class="fa fa-heart control-btn text-danger col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Add to Favourite" song-id='{{obj.song.id}}' onclick="AddtoFav(this)"></span></div>
+                <div><span class="fa fa-remove control-btn text-danger col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Remove from Liked" song-id='{{obj.song.id}}' onclick="RemoveFromLiked(this)"></span></div>
+                <div class="col col-lg-1 col-md-1 col-sm-1 col-1 control-btn">
+                    <div class="dropdown">
+                        <span class="fa fa-tasks control-btn text-info " data-toggle="dropdown"aria-haspopup="true" aria-expanded="false" song-id='{{song.id}}' onclick="getPlaylists(this)"></span>
+                        <div class="dropdown-menu drop-playlist" aria-labelledby="dropdownMenuButton" >
+                            
+                        </div>
+                      </div>
+                </div>
+                {% endif %}
+                <!-- <div><span class="fa fa-tasks control-btn text-info col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Add to Queue" song-id='{{obj.song.id}}' onclick="getPlaylists(this)"></span></div> -->
+                
+                <div><span class="fa fa-share-alt control-btn text-secondary col col-lg-1 col-md-1 col-sm-1 col-1" data-toggle="tooltip" data-placement="top" title="Share Song" song-id='{{obj.song.id}}' onclick="generateShareLink(this)" ></span></div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
+{% block script %}
+{% include 'core/PostRequests.html' %}
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Welcome to Bajate Raho{% endblock %}
+
+{% block content %}
+
+<div id='main'>
+    <div id='msg-div'>
+
+    </div>
+    <h3>Playlist Created By You:</h3>
+    <div>
+        <div class="row"> 
+            <div class="card-deck p-5 mb-5 bg-white w-100">
+                {% for playlist in all_user_playlist %}
+                <div class="col col-lg-2 col-md-3 col-sm-4 col-6 mb-2">
+                    <div class="card" style="margin: 0;" >
+                        <img class="card-img-top control-btn" song-id = '{{playlist.id}}' src="http://127.0.0.1:8000/media/{{playlist.playlist_logo}}" alt="{{playlist.title}}">
+                        <div class="card-body control-btn text-center" song-id='{{playlist.id}}' style="padding: .25rem;">
+                          <p class="card-title" style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; text-transform: uppercase;">{{playlist.title}}</p>
+                        </div>
+                        <div class="card-footer ">
+                            <div class="d-flex flex-column">
+                                <a href="javascript:void(0);" onclick="playPlaylist(this)" class=" fa fa-play text-secondary control-btn p-1" style="text-decoration: none;" playlist-id='{{playlist.id}}' > Play All</a>
+                                <a href="{% url 'displaySinglePlaylist' pk=playlist.id %}" class=" fa fa-eye text-info control-btn p-1" style="text-decoration: none;" playlist-id='{{playlist.id}}'> View</a>
+                                <a href="{% url 'deletePlaylist' pk=playlist.id %}" class=" fa fa-trash text-danger control-btn p-1" style="text-decoration: none;" playlist-id='{{playlist.id}}'> Delete</a>
+                            </div>
+                        </div>
+                      </div>
+    
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+{% include 'core/PostRequests.html' %}
+{% endblock %}
