@@ -1,1 +1,1 @@
-A music app similar to gaana and jiosaavan.
+A music app similar to gaana and jiosaavan in Django.
